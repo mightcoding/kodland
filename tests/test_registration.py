@@ -10,7 +10,7 @@ def setup_database():
     create_db()
     yield
     # Очистка после выполнения тестов
-    os.remove('users.db')
+    #os.remove('users.db')
 
 def test_create_db(setup_database):
     """Тест создания базы данных и таблицы пользователей."""
@@ -19,6 +19,7 @@ def test_create_db(setup_database):
     # Проверяем, существует ли таблица users
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';")
     table_exists = cursor.fetchone()
+    conn.close()
     assert table_exists, "Таблица 'users' должна существовать в базе данных."
 
 def test_add_new_user(setup_database):
@@ -28,11 +29,24 @@ def test_add_new_user(setup_database):
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE username='testuser';")
     user = cursor.fetchone()
+    conn.close()
     assert user, "Пользователь должен быть добавлен в базу данных."
 
+def test_taken_login_user(setup_database):
+    """Тест добавления нового пользователя."""
+    add_user('testuser', 'testuser@example.com', 'password123')
+    answer = authenticate_user("testuser", "password123")
+    assert answer
+
+def test_disply_user(setup_database):
+    """Тест добавления нового пользователя."""
+    answer = display_users()
+    assert answer
 # Возможные варианты тестов:
 """
 Тест добавления пользователя с существующим логином.
+
+
 Тест успешной аутентификации пользователя.
 Тест аутентификации несуществующего пользователя.
 Тест аутентификации пользователя с неправильным паролем.
